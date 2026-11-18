@@ -4,6 +4,8 @@
   "description": "AI-COLD-MAIL-GEN",
   "main": "server.js",
   "scripts": {
+    "build": "npm --prefix ../frontend/GenAI install && npm --prefix ../frontend/GenAI run build",
+    "start": "node server.js",
     "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

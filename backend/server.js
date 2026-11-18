@@ -38,8 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Absolute path to client build folder
-const __dirnamePath = path.resolve();
-const clientBuildPath = path.join(__dirnamePath, '..', 'frontend', 'GenAI', 'dist');
+const clientBuildPath = path.join(__dirname, '..', 'frontend', 'GenAI', 'dist');
 
 // Serve static files
 app.use(express.static(clientBuildPath));
