@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+const configuredBaseURL = import.meta.env.VITE_API_URL;
+const baseURL = import.meta.env.PROD && (!configuredBaseURL || configuredBaseURL.startsWith('/'))
+    ? 'https://advanced-coldmail-generator-2.onrender.com/api'
+    : configuredBaseURL || '/api';
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || '/api'
+    baseURL
 });
 
 api.interceptors.request.use((config) => {
