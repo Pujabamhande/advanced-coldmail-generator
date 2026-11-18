@@ -33,30 +33,31 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Name must be at least 2 characters long' });
     }
 
-    const userExists = await User.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = email.toLowerCase();
+    const userExists = await User.findOne({ email: normalizedEmail });
 
-    if (userExists) {
+    if (userExists?.isVerified) {
       return res.status(400).json({ message: 'Email already registered. Please try logging in.' });
     }
 
     const otp = generateOTP();
     const otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    const user = await User.create({
-      name: username.trim(),
-      email: email.toLowerCase(),
-      password,
-      otp,
-      otpExpiry
-    });
+    const user = userExists || new User({ email: normalizedEmail });
+    user.name = username.trim();
+    user.password = password;
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
 
-    // Send OTP email
     const message = `Your OTP for verification is: ${otp}\n\nThis OTP is valid for 10 minutes.`;
     try {
       await sendEmail({ email: user.email, subject: 'Email Verification OTP - AI Cold Mail Generator', message });
     } catch (error) {
-      console.log('Email sending error:', error.message);
-      // Still allow registration even if email fails
+      console.error('Registration OTP email failed:', error);
+      return res.status(503).json({
+        message: 'Could not send the verification email. Check the email settings and try again.'
+      });
     }
 
     res.status(201).json({

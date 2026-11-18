@@ -43,11 +43,15 @@ const clientBuildPath = path.join(__dirname, '..', 'frontend', 'GenAI', 'dist');
 // Serve static files
 app.use(express.static(clientBuildPath));
 
-// For any route not starting with /api, send index.html
-app.get('/star', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-        res.sendFile(path.join(clientBuildPath, 'index.html'));
+// Serve the frontend entry point for client-side routes such as /signup.
+app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api/')) {
+        return next();
     }
+
+    res.sendFile(path.join(clientBuildPath, 'index.html'), (error) => {
+        if (error) next(error);
+    });
 });
 
 
