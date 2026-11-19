@@ -46,7 +46,8 @@ const VerifyOtp = () => {
                 <p className="text-center text-sm font-bold uppercase tracking-[0.25em] text-teal-800">MailGen AI</p>
                 <h2 className="mt-3 text-center text-3xl font-bold tracking-tight text-slate-950">Verify your email</h2>
                 <p className="mt-2 text-center text-sm text-slate-600">
-                    We sent a code to <span className="font-medium text-slate-900">{email}</span>
+                    A verification code is being sent to <span className="font-medium text-slate-900">{email}</span>.
+                    If it doesn't arrive, return to sign up and submit again to request a new code.
                 </p>
             </div>
 
