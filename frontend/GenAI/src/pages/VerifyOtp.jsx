@@ -60,7 +60,7 @@ const VerifyOtp = () => {
                 <h2 className="mt-3 text-center text-3xl font-bold tracking-tight text-slate-950">Verify your email</h2>
                 <p className="mt-2 text-center text-sm text-slate-600">
                     A verification code is being sent to <span className="font-medium text-slate-900">{email}</span>.
-                    If it doesn't arrive, return to sign up and submit again to request a new code.
+                    If it doesn't arrive, use the button below to request a new code.
                 </p>
             </div>
 

@@ -156,15 +156,15 @@ exports.resendOTP = async (req, res) => {
     }
 
     const otp = generateOTP();
-    user.otp = otp;
-    user.otpExpiry = Date.now() + 10 * 60 * 1000;
-    await user.save();
-
     await sendEmail({
       email: user.email,
       subject: 'Email Verification OTP - AI Cold Mail Generator',
       message: `Your OTP for verification is: ${otp}\n\nThis OTP is valid for 10 minutes.`
     });
+
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 10 * 60 * 1000;
+    await user.save();
 
     res.status(200).json({ message: 'A new verification code has been sent to your email.' });
   } catch (error) {
