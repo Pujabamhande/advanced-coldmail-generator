@@ -8,6 +8,7 @@ import ThemeToggle from '../components/ThemeToggle';
 const VerifyOtp = () => {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
+    const [resending, setResending] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     const { login } = useAuth();
@@ -32,6 +33,18 @@ const VerifyOtp = () => {
             toast.error(error.response?.data?.message || 'Verification failed');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleResend = async () => {
+        setResending(true);
+        try {
+            const { data } = await api.post('/auth/resend-otp', { userId, email });
+            toast.success(data.message);
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Could not resend the verification code');
+        } finally {
+            setResending(false);
         }
     };
 
@@ -73,6 +86,14 @@ const VerifyOtp = () => {
                             className="primary-glass flex w-full justify-center rounded-lg px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:ring-4 focus:ring-teal-100 focus:ring-offset-2 disabled:opacity-50"
                         >
                             {loading ? 'Verifying...' : 'Verify Email'}
+                        </button>
+                        <button
+                            type="button"
+                            disabled={resending}
+                            onClick={handleResend}
+                            className="block w-full text-center text-sm font-semibold text-teal-700 disabled:opacity-50"
+                        >
+                            {resending ? 'Sending a new code...' : 'Resend verification code'}
                         </button>
                     </form>
                 </div>

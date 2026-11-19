@@ -50,18 +50,18 @@ exports.registerUser = async (req, res) => {
     user.otpExpiry = otpExpiry;
     await user.save();
 
-    const message = `Your OTP for verification is: ${otp}\n\nThis OTP is valid for 10 minutes.`;
-    await sendEmail({
-      email: user.email,
-      subject: 'Email Verification OTP - AI Cold Mail Generator',
-      message
-    });
-
     res.status(201).json({
-      message: 'Account created. A verification code has been sent to your email.',
+      message: 'Account created. Your verification code is being sent to your email.',
       userId: user._id,
       email: user.email
     });
+
+    const message = `Your OTP for verification is: ${otp}\n\nThis OTP is valid for 10 minutes.`;
+    sendEmail({
+      email: user.email,
+      subject: 'Email Verification OTP - AI Cold Mail Generator',
+      message
+    }).catch(error => console.error('Registration OTP email failed:', error));
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ message: 'Registration failed', error: error.message });
@@ -127,6 +127,49 @@ exports.verifyOTP = async (req, res) => {
   } catch (error) {
     console.error('OTP verification error:', error);
     res.status(500).json({ message: 'Verification failed', error: error.message });
+  }
+};
+
+exports.resendOTP = async (req, res) => {
+  try {
+    const { userId, email } = req.body;
+    const identifier = email || userId;
+
+    if (!identifier) {
+      return res.status(400).json({ message: 'User ID or email is required' });
+    }
+
+    const isObjectId = typeof identifier === 'string' && /^[a-f\d]{24}$/i.test(identifier);
+    const isEmail = typeof identifier === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+    const user = isObjectId
+      ? await User.findById(identifier)
+      : isEmail
+        ? await User.findOne({ email: identifier.trim().toLowerCase() })
+        : null;
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'User is already verified' });
+    }
+
+    const otp = generateOTP();
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 10 * 60 * 1000;
+    await user.save();
+
+    await sendEmail({
+      email: user.email,
+      subject: 'Email Verification OTP - AI Cold Mail Generator',
+      message: `Your OTP for verification is: ${otp}\n\nThis OTP is valid for 10 minutes.`
+    });
+
+    res.status(200).json({ message: 'A new verification code has been sent to your email.' });
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    res.status(500).json({ message: 'Could not resend the verification code', error: error.message });
   }
 };
 
